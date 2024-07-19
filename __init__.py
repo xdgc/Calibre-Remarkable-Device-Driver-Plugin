@@ -20,12 +20,21 @@ class RemarkablePlugin(DevicePlugin):
     supported_platforms = ["linux", "windows", "osx"]
     version = (1, 2, 3)  # The version number of this plugin
     minimum_calibre_version = (0, 7, 53)
+    seen_device = False
 
     FORMATS = ["epub", "pdf"]
 
     MANAGES_DEVICE_PRESENCE = True
 
     def startup(self):
+        # This plugin contains dynamic shared objects (~ .so files),
+        # which Python cannot load from a zip file via zipimport.
+        # Use self as a context manager to compel Calibre to unpack
+        # the zip temporarily, allowing importlib to load the DSOs.
+        with self:
+            return self._startup()
+
+    def _startup(self):
         # Use the plugins directory that's included with the plugin
         sys.path.append(self.plugin_path)
         global remarkable_fs
