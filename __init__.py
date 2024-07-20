@@ -39,8 +39,28 @@ class RemarkablePlugin(DevicePlugin):
         sys.path.append(self.plugin_path)
         global remarkable_fs
         global paramiko
-        import remarkable_fs
-        import paramiko
+        try:
+            import remarkable_fs
+            import paramiko
+        except ImportError as exc:
+            if ('not valid for use in process: mapped file has no Team ID'
+                in exc.msg):
+                import textwrap
+                path = sys.executable
+                print(f'''
+                    NOTICE: the following exception on MacOS indicates
+                    a codesigning mismatch. Your plugin is ad-hoc signed,
+                    but Calibre is not. Consider signing your plugin
+                    objects, if you know what that means.
+                    
+                    Otherwise, while this is not recommended, you can
+                    remove Calibre's code signature with the following
+                    shell commands:
+
+                    cp -p "{path}" "{path}.signed"
+                    codesign -f -s - "{path}"
+                '''.strip())
+            raise
 
         # Currently we only support 1 device. Use this variable to remember if we've already seen it or not so as to
         # not keep detecting it. If for some reason we decide to support multiple devices, we should probably change this
