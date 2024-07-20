@@ -21,6 +21,7 @@ class RemarkablePlugin(DevicePlugin):
     version = (1, 2, 3)  # The version number of this plugin
     minimum_calibre_version = (0, 7, 53)
     seen_device = False
+    rm_data_dir = '/home/root/.local/share/remarkable/xochitl'
 
     FORMATS = ["epub", "pdf"]
 
@@ -120,7 +121,7 @@ class RemarkablePlugin(DevicePlugin):
         # The version of busybox on the remarkable tablet doesn't seem to support `-B 1`,
         # so lets just get the total size in 1024-byte blocks and multiple by 1024
         stdin, stdout, stderr = ssh.exec_command(
-            "df -k " + self.storage
+            f'df -k {self.rm_data_dir}',
         )
         output = stdout.readlines()[-1]
         self.device_total_space = 1024 * int(output.split()[1])
